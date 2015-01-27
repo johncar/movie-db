@@ -15,12 +15,10 @@
 		theMovieDb.search.getMulti({"query":text}, function (resp) {
 
 			var max = 7;
+			var mediaTypes = ["person","movie"];
 			var r = $.parseJSON(resp);
 
 			if ( r.total_results > 0 ) {
-
-				var mediaTypes = ["person","movie"];
-				var labelColor = {"person":"warning", "movie":"success"};
 				suggestions = $.map( r.results, function ( obj ) { if ( mediaTypes.indexOf(obj.media_type) != -1 ) return obj } );
 				suggestions = suggestions.slice(0, max);
 				suggestions = $.map ( suggestions, renderSuggestionItem );
@@ -35,6 +33,7 @@
 		var image = "";
 		var name = "";
 		var callback = function(){};
+        var labelColor = {"person":"warning", "movie":"success"};
 
 		if ( item.media_type == "person" ) {
 
