@@ -48,68 +48,11 @@ Movie.render = function ( config, movieItem ) {
             }
 
             // Trailer
-
-            var trailerElement = component.find('#movie-trailer');
-
-            theMovieDb.movies.getTrailers({"id":movie.id}, function(resp){
-
-                var trailer = $.parseJSON(resp);
-
-                if ( trailer.youtube && trailer.youtube.length > 0 ) {
-                    if ( trailer.youtube[0].source ) {
-                        trailerElement.children('iframe').attr( { "src": "//www.youtube.com/embed/" + trailer.youtube[0].source } );
-                    }
-                } else {
-                    trailerElement.empty();
-                    trailerElement.css({
-                        'background' : 'url( img/no_video_available.gif ) no-repeat center center local'
-                    });
-                }
-
-            }, function(){});
+            Movie.renderTrailer(config, component.find("#movie-trailer"), movieItem.id);
 
             // Cast
+            Movie.renderCast(config, component.find("#cast"), movieItem.id);
 
-            theMovieDb.movies.getCredits({"id":movieItem.id}, function(resp){
-
-                var credits = $.parseJSON(resp);
-                var castElement = component.find("#cast");
-
-                var sortByOrder = function(a, b) {
-                    return a.order-b.order;
-                }
-
-                credits.cast.sort(sortByOrder);
-
-                $.map( credits.cast, function ( cast ) {
-
-                    var size = config["images"]["profile_sizes"][1];
-                    var imageURL = ( cast.profile_path ) ? config["images"]["base_url"] + size + cast.profile_path : "";
-
-                    var item = $(
-                        '<li class="timeline-inverted">'
-                         +'<div class="timeline-badge warning">' + (cast.order+1) + '</div>'
-                         +'  <div class="timeline-panel">'
-                         +'     <img src="' + imageURL + '" class="img-responsive">'
-                         +'     <div class="timeline-heading">'
-                         +'        <h5 class="timeline-title">' + cast.name + '</h5>'
-                         +'     </div>'
-                         +'     <div class="timeline-body"></div>'
-                         +'  </div>'
-                        +'</li>').appendTo(castElement);
-
-                    if ( cast.character ) {
-                        var character = ( cast.character.length > 20 ) ? cast.character.slice(0,20) + "..." : cast.character;
-                        item.find('.timeline-body').append('<p><span class="label label-default">as '+ character + '</span></p>');
-                    }
-
-                    item.click(function(){
-                        redirect( "person", cast.id );
-                    });
-
-                });
-
-            }, function(){});
 
         }, function(){} );
 
@@ -117,4 +60,67 @@ Movie.render = function ( config, movieItem ) {
 
     return component;
 
+}
+
+Movie.renderCast = function (config, castElement, movieID ) {
+
+    theMovieDb.movies.getCredits({"id":movieID}, function(resp){
+
+        var credits = $.parseJSON(resp);
+
+        var sortByOrder = function(a, b) {
+            return a.order-b.order;
+        }
+
+        credits.cast.sort(sortByOrder);
+
+        $.map( credits.cast, function ( cast ) {
+
+            var size = config["images"]["profile_sizes"][1];
+            var imageURL = ( cast.profile_path ) ? config["images"]["base_url"] + size + cast.profile_path : "";
+
+            var item = $(
+                '<li class="timeline-inverted">'
+                 +'<div class="timeline-badge warning">' + (cast.order+1) + '</div>'
+                 +'  <div class="timeline-panel">'
+                 +'     <img src="' + imageURL + '" class="img-responsive">'
+                 +'     <div class="timeline-heading">'
+                 +'        <h5 class="timeline-title">' + cast.name + '</h5>'
+                 +'     </div>'
+                 +'     <div class="timeline-body"></div>'
+                 +'  </div>'
+                +'</li>').appendTo(castElement);
+
+            if ( cast.character ) {
+                var character = ( cast.character.length > 20 ) ? cast.character.slice(0,20) + "..." : cast.character;
+                item.find('.timeline-body').append('<p><span class="label label-default">as '+ character + '</span></p>');
+            }
+
+            item.click(function(){
+                redirect( "person", cast.id );
+            });
+
+        });
+
+    }, function(){});
+}
+
+Movie.renderTrailer = function (config, trailerElement, movieID ) {
+
+    theMovieDb.movies.getTrailers({"id":movieID}, function(resp){
+
+        var trailer = $.parseJSON(resp);
+
+        if ( trailer.youtube && trailer.youtube.length > 0 ) {
+            if ( trailer.youtube[0].source ) {
+                trailerElement.children('iframe').attr( { "src": "//www.youtube.com/embed/" + trailer.youtube[0].source } );
+            }
+        } else {
+            trailerElement.empty();
+            trailerElement.css({
+                'background' : 'url( img/no_video_available.gif ) no-repeat center center local'
+            });
+        }
+
+    }, function(){});
 }

@@ -21,57 +21,51 @@
 
 				var mediaTypes = ["person","movie"];
 				var labelColor = {"person":"warning", "movie":"success"};
-
 				suggestions = $.map( r.results, function ( obj ) { if ( mediaTypes.indexOf(obj.media_type) != -1 ) return obj } );
-
 				suggestions = suggestions.slice(0, max);
-				suggestions = $.map ( suggestions, function( item, i ) {
-
-					var knownFor = "";
-					var image = "";
-					var name = "";
-					var callback = function(){};
-
-					if ( item.media_type == "person" ) {
-
-						if ( item.profile_path ) {
-							image = config["images"]["base_url"] + config["images"]["profile_sizes"][0] + item.profile_path;
-							image = '<img src="' + image + '" alt="' + item.name + '" class="img-responsive" />';
-						}
-
-						name = item.name;
-						knownFor = "known for: " + $.map( item.known_for, function (obj) {  return obj.original_title } ).join(", ");
-						callback = function() { showPerson( item ) };
-
-					} else if ( item.media_type == "movie" ) {
-
-						if ( item.poster_path ) {
-							image = config["images"]["base_url"] + config["images"]["poster_sizes"][0] + item.poster_path;
-							image = '<img src="' + image + '" alt="' + item.title + '" class="img-responsive" style="width: 45px; height: auto" />';
-						}
-						name = item.title;
-						callback = function() { showMovie( item ) };
-					}
-
-					var itemHTML = '<div class="col-xs-12 col-sm-3">' + image + '</div>' +
-								'<div class="col-xs-12 col-sm-9">' +
-								'	<span class="name">' + name + '</span><br/>' +
-								'   <span class="label label-' + labelColor[ item.media_type ] + '">' + item.media_type + '</span>' +
-								'	<span class="" data-toggle="tooltip" title="">' + knownFor +  '</span>' +
-								'</div>' +
-								'<div class="clearfix"></div>';
-
-					return $('<li class="list-group-item"/>').html( itemHTML ).click( callback );
-				});
-
+				suggestions = $.map ( suggestions, renderSuggestionItem );
 			}
-
-			console.log(suggestions);
-
 			cb(suggestions);
-
 		},
 		function () {});
+	}
+
+	function renderSuggestionItem ( item, i ) {
+		var knownFor = "";
+		var image = "";
+		var name = "";
+		var callback = function(){};
+
+		if ( item.media_type == "person" ) {
+
+			if ( item.profile_path ) {
+				image = config["images"]["base_url"] + config["images"]["profile_sizes"][0] + item.profile_path;
+				image = '<img src="' + image + '" alt="' + item.name + '" class="img-responsive" />';
+			}
+
+			name = item.name;
+			knownFor = "known for: " + $.map( item.known_for, function (obj) {  return obj.original_title } ).join(", ");
+			callback = function() { showPerson( item ) };
+
+		} else if ( item.media_type == "movie" ) {
+
+			if ( item.poster_path ) {
+				image = config["images"]["base_url"] + config["images"]["poster_sizes"][0] + item.poster_path;
+				image = '<img src="' + image + '" alt="' + item.title + '" class="img-responsive" style="width: 45px; height: auto" />';
+			}
+			name = item.title;
+			callback = function() { showMovie( item ) };
+		}
+
+		var itemHTML = '<div class="col-xs-12 col-sm-3">' + image + '</div>' +
+					'<div class="col-xs-12 col-sm-9">' +
+					'	<span class="name">' + name + '</span><br/>' +
+					'   <span class="label label-' + labelColor[ item.media_type ] + '">' + item.media_type + '</span>' +
+					'	<span class="" data-toggle="tooltip" title="">' + knownFor +  '</span>' +
+					'</div>' +
+					'<div class="clearfix"></div>';
+
+		return $('<li class="list-group-item"/>').html( itemHTML ).click( callback );
 
 	}
 
@@ -94,7 +88,7 @@
 		window.location.href = "index.html?media_type=" + media_type + "&id=" + id;
 	}
 
-	// Main
+	// Main function executed once everything is loaded
 
 	$(function () {
 
@@ -137,8 +131,6 @@
 						random = Math.floor( (Math.random() * 10 ) + 1 );
 
 						movies = movies.results.slice( random, random + 12 );
-
-						console.log(random);
 
 						$.map( movies, function ( movie ) {
 
