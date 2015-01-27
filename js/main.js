@@ -88,81 +88,63 @@
 		window.location.href = "index.html?media_type=" + media_type + "&id=" + id;
 	}
 
-	// Main function executed once everything is loaded
+	function loadRequestedMedia(urlVars) {
+		var id = urlVars['id'];
 
-	$(function () {
+		if ( urlVars['media_type'] == "person" ) {
+			theMovieDb.people.getById({ "id": id }, function( resp ){
+				showPerson( $.parseJSON(resp) );
+			}, function(){} );
 
-		// config init
-		theMovieDb.configurations.getConfiguration(
-			function(resp) {
-				// load config
-				config = $.parseJSON(resp);
+		} else if ( urlVars['media_type'] == "movie" ) {
+			theMovieDb.movies.getById({ "id": id }, function( resp ){
+				showMovie( $.parseJSON(resp) );
+			}, function(){} );
+		}
 
-				// Process GET vars
-				var urlVars = getUrlVars();
+	}
 
-				if ( urlVars['media_type'] ) {
+	function loadPopularMovies() {
 
-					// Load requested media
+		theMovieDb.movies.getPopular({}, function(resp){
 
-					var id = urlVars['id'];
+			var popular = $('#popular');
+			var movies = $.parseJSON(resp);
+			var counter = 0;
+			var row, random;
 
-					if ( urlVars['media_type'] == "person" ) {
-						theMovieDb.people.getById({ "id": id }, function( resp ){
-							showPerson( $.parseJSON(resp) );
-						}, function(){} );
-					} else if ( urlVars['media_type'] == "movie" ) {
-						theMovieDb.movies.getById({ "id": id }, function( resp ){
-							showMovie( $.parseJSON(resp) );
-						}, function(){} );
-					}
+			random = Math.floor( (Math.random() * 10 ) + 1 );
 
-				} else {
+			movies = movies.results.slice( random, random + 12 );
 
-					// Load popular movies
+			$.map( movies, function ( movie ) {
 
-					theMovieDb.movies.getPopular({}, function(resp){
-
-						var popular = $('#popular');
-						var movies = $.parseJSON(resp);
-						var counter = 0;
-						var row, random;
-
-						random = Math.floor( (Math.random() * 10 ) + 1 );
-
-						movies = movies.results.slice( random, random + 12 );
-
-						$.map( movies, function ( movie ) {
-
-							if ( counter++ % 4 == 0 ) {
-								row = $('<div></div>').appendTo(popular);
-								row.addClass('container');
-							}
-
-							var posterURL = ( movie.poster_path ) ? config["images"]["base_url"] + config["images"]["poster_sizes"][3] + movie.poster_path : "";
-
-							item = $(
-								'<div class="col-sm-6 col-md-3">'
-									+ '<div class="thumbnail">'
-										+ '<img class="shadow" alt="' + movie.title + '" title="' + movie.title + '" src="' + posterURL + '">'
-										+ '<div class="caption">'
-										+ '   <h4>' + movie.title + '</h4>'
-									+ ' </div></div></div>'
-							).appendTo(row);
-
-							item.click(function(){
-								redirect( "movie", movie.id );
-							});
-
-						});
-
-					}, function(){});
+				if ( counter++ % 4 == 0 ) {
+					row = $('<div></div>').appendTo(popular);
+					row.addClass('container');
 				}
 
-		}, function(){} );
+				var posterURL = ( movie.poster_path ) ? config["images"]["base_url"] + config["images"]["poster_sizes"][3] + movie.poster_path : "";
 
-		// Set element's actions
+				item = $(
+					'<div class="col-sm-6 col-md-3">'
+						+ '<div class="thumbnail">'
+							+ '<img class="shadow" alt="' + movie.title + '" title="' + movie.title + '" src="' + posterURL + '">'
+							+ '<div class="caption">'
+							+ '   <h4>' + movie.title + '</h4>'
+						+ ' </div></div></div>'
+				).appendTo(row);
 
+				item.click(function(){
+					redirect( "movie", movie.id );
+				});
+
+			});
+
+		}, function(){});
+	}
+
+	function initEvents () {
 		$('[data-toggle="tooltip"]').tooltip();
 
 		$('#fullscreen').on('click', function(event) {
@@ -174,7 +156,6 @@
 
 			$('#workspace').empty();
 			$('#person-list').empty();
-
 
 			if ( $('#person-list-search').val().length > 0 ) {
 
@@ -207,5 +188,30 @@
 				elem.slideUp( 100 );
 			}
 		})
+
+	}
+
+	// Main function executed once everything is loaded
+	$(function () {
+
+		// config init
+		theMovieDb.configurations.getConfiguration(
+			function(resp) {
+				// load config
+				config = $.parseJSON(resp);
+
+				// Process GET vars
+				var urlVars = getUrlVars();
+
+				if ( urlVars['media_type'] ) {
+					loadRequestedMedia(urlVars);
+
+				} else {
+					loadPopularMovies();
+				}
+
+		}, function(){} );
+
+		initEvents();
 
 	});
