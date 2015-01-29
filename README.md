@@ -1,6 +1,8 @@
 # movie-db
 Demo app to display general info of movies and actors.
 
+Available at: http://movie-db.byethost7.com
+
 Abble to: 
 * Show popular movies
 * Biography, sinapsis and other general info
@@ -14,3 +16,4 @@ Powered by:
 * JS, JQuery
 * Bootstrap (CSS)
 * The Movie DB API
+
