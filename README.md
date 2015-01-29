@@ -10,4 +10,7 @@ Abble to:
 * Philmography of actor
 * Display trailers 
 
-
+Powered by:
+* JS, JQuery
+* Bootstrap (CSS)
+* The Movie DB API
